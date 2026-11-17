@@ -1890,19 +1890,18 @@ a:focus-visible {
                 const idToken = await window.firebaseAPI.getIdToken();
                 if (!idToken) throw new Error('انتهت جلسة الدخول. سجّل الدخول ثم أعد المحاولة.');
 
-                setPDFExtractStatus('يراجع Gemini الأسئلة والاختيارات...');
-                const response = await fetch(`${baseUrl}/questions/extract`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${idToken}`
-                    },
-                    body: JSON.stringify({
-                        text,
-                        pageNumbers,
-                        sourceFileName: activePdfFileName || 'ملف PDF'
-                    })
-                });
+               setPDFExtractStatus('يراجع Gemini الأسئلة والاختيارات...');
+const response = await fetch(`${baseUrl}/questions/extract`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        text,
+        pageNumbers,
+        sourceFileName: activePdfFileName || 'ملف PDF'
+    })
+}); 
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.error || 'تعذر تحليل الملف.');
                 extractedPdfQuestions = Array.isArray(result.questions) ? result.questions : [];
