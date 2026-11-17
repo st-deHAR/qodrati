@@ -1,6 +1,7 @@
 {
   "name": "qodrati-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "Backend server for Qodrati platform handling Gemini AI requests securely",
   "main": "server.js",
   "scripts": {
