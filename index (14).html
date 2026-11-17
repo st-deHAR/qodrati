@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="theme-male">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google-site-verification" content="cl-NnGRzYvVWgTkbnPqXrHGWIpDGadOnvuX9UwPU-dI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة قُدراتي - بنك منظم لأسئلة القدرات</title>
+
+    
+    <!-- Google Fonts (Cairo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tesseract.js (OCR Engine) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+    <!-- PDF.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-male min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="custom-card border-b sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-wide">منصة قُدراتي</h1>
+                    <p class="text-xs text-slate-400">بنك الأسئلة الذكي والمنظم</p>
+                </div>
+            </div>
+
+            <!-- Guest Quick Header Area -->
+            <div id="navGuestArea" class="flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-extrabold" title="نقاط الضيف المؤقتة">
+                    <i class="fa-solid fa-bolt text-amber-400"></i>
+                    <span id="guestHeaderPoints">0</span>
+                    <span class="hidden sm:inline">نقطة</span>
+                </div>
+                <button onclick="openAuthFromGuest()" class="btn-primary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-user-plus"></i> <span class="hidden sm:inline">حفظ النقاط /</span> دخول
+                </button>
+            </div>
+
+            <!-- Profile & Gender Badge -->
+            <div id="navUserArea" class="hidden items-center gap-2 sm:gap-4">
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-extrabold cursor-pointer" onclick="switchTab('league')" title="نقاطك في دوري قُدراتي العام">
+                    <i class="fa-solid fa-trophy text-yellow-400"></i>
+                    <span id="navUserPoints">0</span>
+                    <span class="hidden sm:inline">نقطة</span>
+                </div>
+                <div class="text-left hidden md:block">
+                    <div id="navUserName" class="font-bold text-sm">اسم الطالب</div>
+                    <span id="navGenderBadge" class="text-xs px-2 py-0.5 rounded-full bg-sky-900 text-sky-200">طالب</span>
+                </div>
+                <button id="bellBtn" onclick="openNotifications()" title="الإشعارات" aria-label="الإشعارات" class="relative p-2 rounded-lg hover:bg-slate-700/50 transition">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                    <span id="bellBadge" class="hidden absolute -top-0.5 -left-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold items-center justify-center">0</span>
+                </button>
+                <button onclick="logout()" title="تسجيل الخروج" class="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition">
+                    <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs Bar -->
+    <nav id="appNav" class="hidden custom-card border-b bg-opacity-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 flex gap-2 overflow-x-auto py-2 scrollbar-none">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition bg-sky-600 text-white">
+                <i class="fa-solid fa-chart-pie"></i> الرئيسية
+            </button>
+            <button onclick="switchTab('challenge')" id="tab-challenge" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition hover:bg-slate-700/50">
+                <i class="fa-solid fa-swords fa-fire text-amber-400"></i> التحدي والمبارزة
+            </button>
+            <button onclick="switchTab('league')" id="tab-league" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition hover:bg-slate-700/50">
+                <i class="fa-solid fa-trophy text-yellow-400"></i> دوري قُدراتي العام
+            </button>
+            <button onclick="switchTab('quant')" id="tab-quant" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition hover:bg-slate-700/50">
+                <i class="fa-solid fa-calculator"></i> القسم الكمي
+            </button>
+            <button onclick="switchTab('verbal')" id="tab-verbal" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition hover:bg-slate-700/50">
+                <i class="fa-solid fa-book-open"></i> القسم اللفظي
+            </button>
+            <button onclick="switchTab('pdf')" id="tab-pdf" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition hover:bg-slate-700/50">
+                <i class="fa-solid fa-file-pdf"></i> مستعرض الـ PDF
+            </button>
+            <button onclick="switchTab('quiz')" id="tab-quiz" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition hover:bg-slate-700/50">
+                <i class="fa-solid fa-circle-question"></i> منشئ الاختبارات
+            </button>
+            <button onclick="switchTab('community')" id="tab-community" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition hover:bg-slate-700/50">
+                <i class="fa-solid fa-comments"></i> مجتمع قدراتي
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+
+        <!-- LOGIN / REGISTER VIEW -->
+        <section id="view-auth" class="max-w-md mx-auto my-8 space-y-5">
+            <!-- Instant Guest Play Card -->
+            <div class="custom-card p-6 rounded-2xl shadow-xl border-amber-500/60 pulse-amber text-center space-y-3 bg-gradient-to-r from-slate-800 to-slate-900">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-extrabold">
+                    <i class="fa-solid fa-bolt"></i> تفاعل فوري بدون تسجيل
+                </div>
+                <h2 class="text-xl font-extrabold">ابدأ مبارزة قدراتي الآن!</h2>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    نافس الذكاء الاصطناعي في 5 جولات سريعة أو حل سؤال اليوم، واجمع النقاط فوراً قبل إنشاء حسابك.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                    <button type="button" onclick="enterGuestChallenge('duel')" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs shadow-lg flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-fire"></i> ابدأ المبارزة فوراً
+                    </button>
+                    <button type="button" onclick="enterGuestChallenge('league')" class="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-trophy text-yellow-400"></i> شاهد الدوري
+                    </button>
+                </div>
+            </div>
+
+            <div class="custom-card p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+                <div class="text-center mb-6">
+                    <i class="fa-solid fa-user-graduate text-5xl text-accent mb-3"></i>
+                    <h2 class="text-2xl font-bold">تسجيل الدخول / حساب جديد</h2>
+                    <p class="text-sm text-slate-400 mt-1">اختر اسم المستخدم والجنس لتجهيز الثيم الخاص بك</p>
+                </div>
+                <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-slate-300">اسم المستخدم</label>
+                        <input type="text" id="usernameInput" required placeholder="أدخل اسمك أو لقبك" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 focus:outline-none focus:border-sky-500 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-slate-300">كلمة المرور</label>
+                        <input type="password" id="passwordInput" required placeholder="******" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 focus:outline-none focus:border-sky-500 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold mb-2 text-slate-300">الجنس (يحدد ألوان واستجابة الثيم)</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="gender-btn flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 cursor-pointer bg-slate-800/50 hover:bg-slate-700/50 transition">
+                                <input type="radio" name="gender" value="male" checked class="accent-sky-500">
+                                <i class="fa-solid fa-mars text-blue-400"></i>
+                                <span class="text-sm font-semibold">ولد (أزرق/رمادي)</span>
+                            </label>
+                            <label class="gender-btn flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 cursor-pointer bg-slate-800/50 hover:bg-slate-700/50 transition">
+                                <input type="radio" name="gender" value="female" class="accent-pink-500">
+                                <i class="fa-solid fa-venus text-pink-400"></i>
+                                <span class="text-sm font-semibold">بنت (وردي/أرجواني)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <p class="text-[11px] text-amber-300 leading-relaxed">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        اسم المستخدم من 3 إلى 20 حرفًا ولا يمكن تغييره لاحقًا. لا توجد خاصية استرجاع لكلمة المرور، فاحفظها جيدًا.
+                    </p>
+
+                    <button type="submit" class="w-full py-3 rounded-xl btn-primary font-bold text-sm shadow-lg mt-4 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> الدخول إلى المنصة
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="hidden space-y-6">
+            <!-- Banner / Welcome -->
+            <div class="custom-card p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 bg-gradient-to-r from-slate-800 to-slate-900 border-accent">
+                <div>
+                    <h2 class="text-2xl font-extrabold flex items-center gap-2">
+                        أهلاً بك <span id="dashUsername" class="text-accent">طالب</span> 👋
+                    </h2>
+                    <p class="text-sm text-slate-300 mt-1">ابدأ بتجميع أسئلتك، تصنيفها، وحل ملفات الأسئلة والاختبارات المحاكية.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="switchTab('challenge')" class="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm shadow-lg flex items-center gap-2 whitespace-nowrap transition">
+                        <i class="fa-solid fa-bolt"></i> ابدأ مبارزة واجمع نقاط
+                    </button>
+                    <button onclick="openAddQuestionModal()" class="btn-primary px-5 py-3 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-plus"></i> إضافة سؤال جديد
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="custom-card p-4 rounded-xl text-center">
+                    <i class="fa-solid fa-calculator text-2xl text-blue-400 mb-1"></i>
+                    <div id="statQuantCount" class="text-2xl font-black">0</div>
+                    <div class="text-xs text-slate-400">أسئلة الكمي</div>
+                </div>
+                <div class="custom-card p-4 rounded-xl text-center">
+                    <i class="fa-solid fa-font text-2xl text-purple-400 mb-1"></i>
+                    <div id="statVerbalCount" class="text-2xl font-black">0</div>
+                    <div class="text-xs text-slate-400">أسئلة اللفظي</div>
+                </div>
+                <div class="custom-card p-4 rounded-xl text-center">
+                    <i class="fa-solid fa-folder text-2xl text-emerald-400 mb-1"></i>
+                    <div id="statFolderCount" class="text-2xl font-black">0</div>
+                    <div class="text-xs text-slate-400">الأقسام الفرعية</div>
+                </div>
+                <div class="custom-card p-4 rounded-xl text-center">
+                    <i class="fa-solid fa-trophy text-2xl text-amber-400 mb-1"></i>
+                    <div id="statQuizCount" class="text-2xl font-black">0</div>
+                    <div class="text-xs text-slate-400">اختبارات مجراة</div>
+                </div>
+            </div>
+
+            <!-- Admin-only visitor analytics -->
+            <div id="adminVisitorStats" class="hidden custom-card p-5 rounded-2xl border border-emerald-700/60">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-chart-line text-2xl text-emerald-400"></i>
+                    <div>
+                        <div class="text-sm text-slate-300">زوار الموقع اليوم (أجهزة/متصفحات فريدة تقريبًا)</div>
+                        <div id="adminVisitorCount" class="text-3xl font-black mt-1">—</div>
+                        <div class="text-xs text-slate-500 mt-1">يُحسب المتصفح مرة واحدة يوميًا، حتى لو الزائر لم يسجّل الدخول.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="custom-card p-6 rounded-2xl">
+                    <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-amber-400"></i> خيارات سريعة
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="switchTab('quant')" class="p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl border border-slate-700 text-right">
+                            <i class="fa-solid fa-folder-plus text-sky-400 block mb-1"></i>
+                            <span class="text-sm font-bold block">مجلدات الكمي</span>
+                            <span class="text-xs text-slate-400">الصعبة، التكرار...</span>
+                        </button>
+                        <button onclick="switchTab('verbal')" class="p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl border border-slate-700 text-right">
+                            <i class="fa-solid fa-folder-plus text-pink-400 block mb-1"></i>
+                            <span class="text-sm font-bold block">مجلدات اللفظي</span>
+                            <span class="text-xs text-slate-400">التناظر، إكمال الجمل...</span>
+                        </button>
+                        <button onclick="switchTab('pdf')" class="p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl border border-slate-700 text-right">
+                            <i class="fa-solid fa-file-pdf text-red-400 block mb-1"></i>
+                            <span class="text-sm font-bold block">مستعرض PDF</span>
+                            <span class="text-xs text-slate-400">حل وقراءة الملفات</span>
+                        </button>
+                        <button onclick="switchTab('challenge')" class="p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl border border-amber-500/40 text-right">
+                            <i class="fa-solid fa-fire text-amber-400 block mb-1"></i>
+                            <span class="text-sm font-bold block">التحدي والمبارزة</span>
+                            <span class="text-xs text-slate-400">نافس واجمع نقاط</span>
+                        </button>
+                        <button onclick="switchTab('league')" class="p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl border border-yellow-500/40 text-right">
+                            <i class="fa-solid fa-trophy text-yellow-400 block mb-1"></i>
+                            <span class="text-sm font-bold block">دوري قُدراتي العام</span>
+                            <span class="text-xs text-slate-400">ترتيب المتصدرين</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Latest Added Questions Preview -->
+                <div class="custom-card p-6 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-sky-400"></i> آخر الأسئلة المضافة
+                        </h3>
+                        <div id="latestQuestionsList" class="space-y-2 max-h-48 overflow-y-auto">
+                            <!-- Items injected via JS -->
+                        </div>
+                    </div>
+                    <button onclick="openAddQuestionModal()" class="mt-4 w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold">
+                        + إضافة سؤال بصورة OCR أو نص
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUESTIONS BANK VIEW (QUANT / VERBAL) -->
+        <section id="view-bank" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 id="bankTitle" class="text-2xl font-bold flex items-center gap-2">
+                        القسم الكمي
+                    </h2>
+                    <p class="text-xs text-slate-400">أنشئ المجلدات المخصصة وحفظ فيها الأسئلة المهمة والصعبة والمتكررة.</p>
+                </div>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="openCreateFolderModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-folder-plus text-amber-400"></i> إنشاء مجلد جديد
+                    </button>
+                    <button onclick="openAddQuestionModal()" class="btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-plus"></i> إضافة سؤال
+                    </button>
+                </div>
+            </div>
+
+            <!-- Folders Selector Filter -->
+            <div id="folderBadgesList" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Questions Grid/List -->
+            <div id="questionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- PDF VIEWER VIEW -->
+        <section id="view-pdf" class="hidden space-y-4">
+            <div class="custom-card p-4 rounded-xl flex flex-wrap justify-between items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <label class="btn-primary px-4 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-2">
+                        <i class="fa-solid fa-upload"></i> فتح ملف PDF
+                        <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="loadPDF(event)">
+                    </label>
+                    <span id="pdfFileName" class="text-xs text-slate-400 font-semibold truncate max-w-xs">لم يتم اختيار ملف</span>
+                </div>
+
+                <!-- PDF Controls -->
+                <div id="pdfControls" class="hidden flex-wrap items-center gap-2 text-sm">
+                    <button onclick="prevPDFPage()" class="p-2 bg-slate-800 rounded-lg"><i class="fa-solid fa-chevron-right"></i></button>
+                    <span class="text-xs">صفحة <span id="pdfPageNum">1</span> من <span id="pdfPageCount">--</span></span>
+                    <button onclick="nextPDFPage()" class="p-2 bg-slate-800 rounded-lg"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button onclick="zoomInPDF()" class="p-2 bg-slate-800 rounded-lg"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                    <button onclick="zoomOutPDF()" class="p-2 bg-slate-800 rounded-lg"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                </div>
+            </div>
+
+            <!-- PDF Render & Canvas Area -->
+            <div class="custom-card p-4 rounded-xl flex flex-col md:flex-row gap-4 min-h-[600px]">
+                <!-- Canvas Center -->
+                <div class="flex-1 bg-slate-950 rounded-xl overflow-auto p-4 flex justify-center items-start min-h-[500px]">
+                    <div id="pdfCanvasContainer" class="relative">
+                        <canvas id="pdfCanvas" class="shadow-2xl rounded-lg max-w-full h-auto"></canvas>
+                        <div id="pdfEmptyState" class="text-center py-20 text-slate-500">
+                            <i class="fa-solid fa-file-pdf text-6xl mb-3"></i>
+                            <p>اختر ملف PDF للقدرات لعرضه والحل عليه واستخراج الأسئلة</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PDF Quick Notes Sidebar -->
+                <div class="w-full md:w-80 custom-card p-4 rounded-xl flex flex-col">
+                    <h3 class="font-bold text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-note-sticky text-amber-400"></i> ملاحظات وسجل أثناء الحل
+                    </h3>
+                    <textarea id="pdfNotes" placeholder="سجل ملاحظاتك هنا أثناء حل الملف..." class="flex-1 w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs focus:outline-none resize-none mb-3"></textarea>
+                    <button onclick="savePDFQuestionQuickly()" class="btn-primary py-2 rounded-xl text-xs font-bold mb-2">
+                        + تحويل الملاحظة لسؤال سريع
+                    </button>
+                    <div class="mt-3 space-y-2">
+                        <label for="pdfImportPages" class="block text-xs font-semibold">صفحات الملف للاستخراج</label>
+                        <input id="pdfImportPages" type="text" value="1-20" placeholder="مثال: 1-8، 11، 14-16" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs">
+                        <p class="text-[10px] text-slate-500 leading-relaxed">حد أقصى 20 صفحة في المرة. نص الصفحات المحددة يُرسل إلى Gemini للتحليل، ولا يُرفع ملف PDF كاملًا.</p>
+                        <button id="pdfAIExtractBtn" onclick="extractQuestionWithAIFromPDF()" class="w-full py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-extrabold flex items-center justify-center gap-2 shadow transition">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> استخراج أسئلة الصفحات
+                        </button>
+                        <div id="pdfExtractStatus" class="hidden text-[11px] text-sky-300 leading-relaxed"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUIZ GENERATOR VIEW -->
+        <section id="view-quiz" class="hidden space-y-6">
+            <div id="quizSetupCard" class="custom-card p-6 rounded-2xl max-w-xl mx-auto space-y-4">
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-accent"></i> إعداد اختبار القدرات التجريبي
+                </h2>
+                <p class="text-xs text-slate-400">اختر الأقسام أو المجلدات التي تريد الاختيار منها لبناء اختبار ذكي محاكي.</p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1">القسم الرئيسي</label>
+                        <select id="quizCategorySelect" onchange="updateQuizFolderOptions()" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs">
+                            <option value="all">كل الأقسام (كمي + لفظي)</option>
+                            <option value="quant">القسم الكمي فقط</option>
+                            <option value="verbal">القسم اللفظي فقط</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold mb-1">ملف الأسئلة</label>
+                        <select id="quizFolderSelect" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs">
+                            <option value="all">كل الملفات</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold mb-1">عدد الأسئلة</label>
+                        <input type="number" id="quizCountInput" value="5" min="1" max="50" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold mb-1">الوقت المحدد (بالدقائق)</label>
+                        <input type="number" id="quizTimeInput" value="10" min="1" max="120" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs">
+                    </div>
+
+                    <button onclick="startQuiz()" class="w-full py-3 rounded-xl btn-primary font-bold text-xs shadow-lg flex items-center justify-center gap-2 mt-4">
+                        <i class="fa-solid fa-play"></i> لبدء الاختبار الآن
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Quiz Screen -->
+            <div id="quizActiveCard" class="hidden custom-card p-6 rounded-2xl max-w-2xl mx-auto space-y-6">
+                <!-- Quiz Header -->
+                <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+                    <div>
+                        <span id="quizCurrentIndex" class="text-sm font-bold text-accent">السؤال 1 من 5</span>
+                        <span id="quizCategoryBadge" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 mr-2">كمي</span>
+                    </div>
+                    <div class="flex items-center gap-2 font-mono font-bold text-amber-400 text-lg bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+                        <i class="fa-regular fa-clock"></i>
+                        <span id="quizTimerDisplay">10:00</span>
+                    </div>
+                </div>
+
+                <!-- Question Title & Image -->
+                <div class="space-y-4">
+                    <h3 id="quizQuestionText" class="text-lg font-bold leading-relaxed whitespace-pre-wrap">نص السؤال سيظهر هنا...</h3>
+                    <div id="quizImageWrapper" class="hidden">
+                        <img id="quizQuestionImg" src="" alt="صورة السؤال" class="max-h-64 rounded-xl border border-slate-700 mx-auto">
+                    </div>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="quizOptionsContainer" class="grid grid-cols-1 gap-3">
+                    <!-- Dynamic Options -->
+                </div>
+
+                <!-- Quiz Actions -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-700">
+                    <button onclick="nextQuizQuestion()" class="btn-primary px-6 py-2.5 rounded-xl font-bold text-xs mr-auto flex items-center gap-2">
+                        التالي <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Result Screen -->
+            <div id="quizResultCard" class="hidden custom-card p-6 rounded-2xl max-w-xl mx-auto text-center space-y-4">
+                <i class="fa-solid fa-award text-6xl text-amber-400"></i>
+                <h2 class="text-2xl font-bold">نتيجة الاختبار التجريبي</h2>
+                <div class="text-4xl font-extrabold text-accent my-2" id="quizScoreText">80%</div>
+                <p id="quizScoreSub" class="text-xs text-slate-300">أجبت بشكل صحيح على 4 من أصل 5 أسئلة.</p>
+
+                <div class="pt-4 flex gap-3">
+                    <button onclick="resetQuizSetup()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold">
+                        إعادة اختبار جديد
+                    </button>
+                    <button onclick="switchTab('dashboard')" class="flex-1 py-3 btn-primary rounded-xl text-xs font-bold">
+                        العودة للرئيسية
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMMUNITY / COMMENTS VIEW -->
+        <section id="view-community" class="hidden space-y-6 max-w-3xl mx-auto">
+            <div class="custom-card p-6 rounded-2xl space-y-4">
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-comments text-accent"></i> مجتمع ومناقشات الطلاب
+                </h2>
+                <p class="text-xs text-slate-400">شارك اسئلتك ونصائحك مع جميع الطلاب في منصة قُدراتي.</p>
+                <!-- New Post Form -->
+                <form onsubmit="postComment(event)" class="space-y-3">
+                    <textarea id="commentInput" maxlength="1500" placeholder="اكتب سؤالك أو منشورك هنا..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs focus:outline-none resize-none h-24"></textarea>
+                    <label class="block text-xs text-slate-300">إرفاق صورة للسؤال 
+                      <input id="communityImage" type="file" accept="image/*" class="block mt-2 w-full text-xs" />
+                    </label>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        بالنشر أنت توافق على عدم نشر أسئلة اختبارات رسمية مسرّبة أو أي محتوى مخالف أو مسيء. يحق للإدارة حذف أي منشور، ويمكنك الإبلاغ عن أي منشور مخالف.
+                    </p>
+                    <button type="submit" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-paper-plane"></i> نشر المنشور</button>
+                </form>
+            </div>
+
+            <!-- Comments Feed -->
+            <div id="commentsFeed" class="space-y-4">
+                <!-- Dynamic Comments -->
+            </div>
+            <div class="text-center">
+                <button id="loadMorePostsBtn" type="button" onclick="loadMorePosts()" class="hidden px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold">
+                    عرض المزيد
+                </button>
+            </div>
+        </section>
+
+
+        <!-- CHALLENGE & DUEL VIEW (التحدي اليومي + مبارزة 5 جولات + تدريب لا نهائي) -->
+        <section id="view-challenge" class="hidden space-y-6 max-w-3xl mx-auto">
+            <!-- Guest Save Points Prompt (Shown only for guests) -->
+            <div id="guestSaveBanner" class="hidden custom-card p-4 rounded-2xl border-amber-500/60 bg-amber-950/20 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="text-xs space-y-0.5">
+                    <div class="font-extrabold text-amber-300 text-sm"><i class="fa-solid fa-shield-halved"></i> أنت تلعب الآن كضيف (نقاطك المؤقتة: <span id="guestBannerPts">0</span>)</div>
+                    <p class="text-slate-300">أنشئ حساباً مجانياً في ثوانٍ لحفظ نقاطك ودخول دوري قُدراتي العام وحفظ أخطائك للمراجعة!</p>
+                </div>
+                <button onclick="openAuthFromGuest()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs whitespace-nowrap shadow">
+                    سجّل واحفظ نقاطك الآن
+                </button>
+            </div>
+
+            <!-- Top Stats Header -->
+            <div class="custom-card p-5 rounded-2xl flex flex-wrap justify-between items-center gap-4 border-accent">
+                <div>
+                    <h2 class="text-xl font-extrabold flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-amber-400"></i> ساحة تحديات قُدراتي
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">أسئلة متجددة تلقائياً بلا نهاية • أخطاؤك تُحفظ تلقائياً في مجلد <span class="text-amber-300 font-bold">«أخطائي»</span></p>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <div class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-center">
+                        <div class="text-[10px] text-slate-400">شعلة اليوم</div>
+                        <div id="chDailyStreak" class="text-sm font-black text-amber-400">0 🔥</div>
+                    </div>
+                    <div class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-center">
+                        <div class="text-[10px] text-slate-400">نقاط الدوري</div>
+                        <div id="chWeeklyPoints" class="text-sm font-black text-emerald-400">0 ⭐</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode Selector Cards -->
+            <div id="challengeModeSelector" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button type="button" onclick="startDuelMatch()" class="custom-card p-4 rounded-2xl border-amber-500/50 hover:bg-slate-800/70 text-right space-y-1.5 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg"><i class="fa-solid fa-bolt"></i></span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">+50 نقطة للفوز</span>
+                    </div>
+                    <div class="font-extrabold text-sm pt-1">مبارزة 5 جولات</div>
+                    <p class="text-[11px] text-slate-400">تحدَّ منافساً ذكياً في 5 أسئلة سريعة مع بونص السرعة!</p>
+                </button>
+
+                <button type="button" onclick="startDailyChallenge()" id="dailyChallengeBtn" class="custom-card p-4 rounded-2xl border-sky-500/50 hover:bg-slate-800/70 text-right space-y-1.5 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-day"></i></span>
+                        <span id="dailyChallengeBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-bold">+30 نقطة</span>
+                    </div>
+                    <div class="font-extrabold text-sm pt-1">تحدي اليوم</div>
+                    <p class="text-[11px] text-slate-400">سؤال اليوم المميز يتجدد كل 24 ساعة ويحافظ على شعلتك.</p>
+                </button>
+
+                <button type="button" onclick="startEndlessPractice()" class="custom-card p-4 rounded-2xl border-emerald-500/50 hover:bg-slate-800/70 text-right space-y-1.5 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-infinity"></i></span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">+10 لكل سؤال</span>
+                    </div>
+                    <div class="font-extrabold text-sm pt-1">تدريب لا نهائي</div>
+                    <p class="text-[11px] text-slate-400">أسئلة كمية ولفظية مولّدة بأرقام متجددة بلا توقف.</p>
+                </button>
+            </div>
+
+            <!-- Category Filter for Duel / Endless -->
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="text-slate-400 font-semibold">نوع الأسئلة:</span>
+                    <button type="button" onclick="setDuelCategory('all')" id="dcat-all" class="dcat-btn px-3 py-1.5 rounded-xl text-xs font-bold btn-primary">شامل (كمي + لفظي)</button>
+                    <button type="button" onclick="setDuelCategory('quant')" id="dcat-quant" class="dcat-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300">كمي فقط</button>
+                    <button type="button" onclick="setDuelCategory('verbal')" id="dcat-verbal" class="dcat-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300">لفظي فقط</button>
+                </div>
+                <button type="button" onclick="toggleSoundFX()" id="soundFxBtn" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-volume-high text-sky-400"></i> <span>الأصوات: مفعّلة</span>
+                </button>
+            </div>
+
+            <!-- Active Arena Card (Duel / Daily / Endless) -->
+            <div id="arenaActiveCard" class="hidden custom-card p-6 rounded-2xl space-y-5 shadow-2xl">
+                <!-- Duel Scoreboard Header (Shown during Duel) -->
+                <div id="duelScoreHeader" class="hidden p-3.5 rounded-xl bg-slate-900/90 border border-slate-700 space-y-2">
+                    <div class="flex items-center justify-between text-xs font-extrabold">
+                        <div class="flex items-center gap-2 text-sky-400">
+                            <i class="fa-solid fa-user"></i>
+                            <span id="duelPlayerName">أنت</span>:
+                            <span id="duelPlayerScore" class="text-base text-white">0</span>
+                        </div>
+                        <span id="duelRoundLabel" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-300">الجولة 1 / 5</span>
+                        <div class="flex items-center gap-2 text-pink-400">
+                            <span id="duelBotScore" class="text-base text-white">0</span>
+                            :<span id="duelBotName">منافس قُدراتي</span>
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                    </div>
+                    <div id="duelBotStatus" class="text-[11px] text-center text-slate-400">المنافس يفكر في الإجابة...</div>
+                </div>
+
+                <!-- Question Meta -->
+                <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span id="arenaBadgeCat" class="px-2.5 py-1 rounded-lg bg-sky-900/60 text-sky-300 text-xs font-bold">كمي</span>
+                        <span id="arenaBadgeSub" class="px-2.5 py-1 rounded-lg bg-slate-800 text-amber-300 text-xs font-semibold">نسب مئوية</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
+                        <i class="fa-regular fa-clock"></i> <span id="arenaTimer">00s</span>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <h3 id="arenaQuestionText" class="text-lg font-bold leading-relaxed whitespace-pre-wrap">جاري تحضير السؤال...</h3>
+
+                <!-- Choices -->
+                <div id="arenaOptionsContainer" class="grid grid-cols-1 gap-3"></div>
+
+                <!-- Explanation & Feedback -->
+                <div id="arenaFeedbackBox" class="hidden p-4 rounded-xl border text-xs space-y-2">
+                    <div id="arenaFeedbackTitle" class="font-extrabold text-sm"></div>
+                    <p id="arenaFeedbackExp" class="text-slate-200 leading-relaxed"></p>
+                    <div id="arenaMistakeSavedNote" class="hidden text-[11px] text-amber-300 font-semibold pt-1">
+                        <i class="fa-solid fa-folder-open"></i> تم حفظ هذا السؤال تلقائياً في مجلد «أخطائي» لمراجعته لاحقاً!
+                    </div>
+                </div>
+
+                <!-- Footer Controls -->
+                <div class="flex flex-wrap justify-between items-center gap-3 pt-3 border-t border-slate-700">
+                    <button type="button" onclick="exitArena()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
+                        إنهاء والعودة
+                    </button>
+                    <button type="button" id="arenaNextBtn" onclick="handleArenaNext()" class="hidden btn-primary px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 mr-auto">
+                        التالي <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Duel Summary Result Card -->
+            <div id="duelResultCard" class="hidden custom-card p-6 rounded-2xl text-center space-y-4 shadow-2xl border-amber-500/50">
+                <div id="duelResultIcon" class="text-5xl">🏆</div>
+                <h3 id="duelResultTitle" class="text-2xl font-extrabold">انتهت المبارزة!</h3>
+                <p id="duelResultSubtitle" class="text-xs text-slate-300"></p>
+                <div class="grid grid-cols-3 gap-3 max-w-md mx-auto pt-2">
+                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                        <div class="text-[10px] text-slate-400">نقاطك</div>
+                        <div id="duelFinalMyScore" class="text-lg font-black text-sky-400">0</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                        <div class="text-[10px] text-slate-400">المنافس</div>
+                        <div id="duelFinalBotScore" class="text-lg font-black text-pink-400">0</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                        <div class="text-[10px] text-slate-400">المكافأة</div>
+                        <div id="duelFinalEarned" class="text-lg font-black text-amber-400">+0</div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap justify-center gap-3 pt-3">
+                    <button type="button" onclick="startDuelMatch()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs">
+                        <i class="fa-solid fa-rotate-right"></i> مبارزة جديدة
+                    </button>
+                    <button type="button" onclick="switchTab('league')" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold">
+                        <i class="fa-solid fa-trophy"></i> ترتيب الدوري
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- WEEKLY LEAGUE VIEW (دوري قُدراتي العام المتجدد) -->
+        <section id="view-league" class="hidden space-y-6 max-w-3xl mx-auto">
+            <div class="custom-card p-6 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-amber-500/50">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-2xl font-extrabold flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-yellow-400"></i> دوري قُدراتي العام
+                        </h2>
+                        <span id="permanentLeagueBadge" class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-bold">دوري دائم</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">دوري دائم ومستمر! اجمع النقاط وتنافس مع أبطال المنصة لتتصدر قائمة الصدارة للأبد.</p>
+                    <div class="text-[11px] text-sky-400 font-semibold mt-1.5">
+                        <i class="fa-regular fa-hourglass-half"></i> تجديد نقاط الأسبوع بعد: <span id="permanentLeagueStatus" class="font-bold">--</span>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="switchTab('challenge')" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-extrabold flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i> اجمع نقاطاً
+                    </button>
+                    <button onclick="refreshPermanentLeague()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Current User / Guest Rank Banner -->
+            <div class="custom-card p-4 rounded-2xl flex flex-wrap justify-between items-center gap-3 bg-slate-900/80 border border-sky-500/40">
+                <div class="flex items-center gap-3">
+                    <div id="leagueMyRankBadge" class="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-300 font-black flex items-center justify-center text-sm">#-</div>
+                    <div>
+                        <div id="leagueMyName" class="font-bold text-sm">أنت</div>
+                        <div id="leagueMyLevelTitle" class="text-[11px] text-slate-400">اللقب: مبتدئ قدرات 🌱</div>
+                    </div>
+                </div>
+                <div class="text-left">
+                    <div class="text-lg font-black text-amber-400"><span id="leagueMyWeeklyPts">0</span> نقطة هذا الأسبوع</div>
+                    <div class="text-[10px] text-slate-400">إجمالي نقاطك الكلية: <span id="leagueMyTotalPts" class="font-bold text-slate-200">0</span></div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Rows -->
+            <div id="permanentLeagueContainer" class="custom-card p-4 rounded-2xl space-y-2.5">
+                <div class="text-center py-8 text-slate-400 text-xs">جاري تحميل جدول دوري قُدراتي العام...</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- TOASTS: تنبيهات فورية داخل الموقع -->
+    <div id="toastBox" class="fixed top-3 inset-x-3 z-[70] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+    <!-- MODAL: REPLIES (ردود المنشور في حاوية داخل الشاشة) -->
+    <div id="repliesModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm items-end sm:items-center justify-center sm:p-4" onclick="if (event.target === this) closeReplies()">
+        <div class="custom-card w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[88dvh] sm:h-auto sm:max-h-[85dvh] shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="repliesTitle">
+            <div class="flex items-start justify-between gap-3 p-4 border-b border-slate-700">
+                <div class="min-w-0">
+                    <h3 id="repliesTitle" class="font-bold text-sm">الردود</h3>
+                    <p id="repliesPostPreview" class="text-xs text-slate-400 mt-1 line-clamp-2 break-words"></p>
+                </div>
+                <button type="button" onclick="closeReplies()" aria-label="إغلاق" class="shrink-0 p-1 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div id="repliesList" class="flex-1 min-h-[160px] overflow-y-auto overscroll-contain p-4 space-y-3"></div>
+            <form onsubmit="submitReply(event)" class="p-3 border-t border-slate-700 flex gap-2">
+                <input id="replyModalInput" maxlength="500" autocomplete="off" class="min-w-0 flex-1 px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm" placeholder="اكتب ردك..." />
+                <button id="replyModalSubmit" type="submit" class="btn-primary px-4 rounded-xl text-xs font-bold whitespace-nowrap">إرسال</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: REPORT REASON -->
+    <div id="reportModal" class="fixed inset-0 z-[60] hidden bg-black/70 backdrop-blur-sm items-center justify-center p-4" onclick="if (event.target === this) closeReportModal()">
+        <div class="custom-card w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl" role="dialog" aria-modal="true">
+            <h3 id="reportModalTitle" class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-flag text-red-400"></i> الإبلاغ عن منشور</h3>
+            <div id="reportReasons" class="space-y-2"></div>
+            <div class="flex justify-end gap-2 pt-1">
+                <button type="button" onclick="closeReportModal()" class="px-4 py-2 bg-slate-800 rounded-xl text-xs">إلغاء</button>
+                <button id="reportSubmitBtn" type="button" onclick="submitReport()" class="btn-primary px-4 py-2 rounded-xl text-xs font-bold">إرسال البلاغ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NOTIFICATIONS CENTER -->
+    <div id="notifModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm items-end sm:items-center justify-center sm:p-4" onclick="if (event.target === this) closeNotifications()">
+        <div class="custom-card w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[88dvh] sm:h-auto sm:max-h-[85dvh] shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="notifTitle">
+            <div class="flex items-center justify-between gap-3 p-4 border-b border-slate-700">
+                <h3 id="notifTitle" class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-bell text-amber-400"></i> مركز الإشعارات</h3>
+                <button type="button" onclick="closeNotifications()" aria-label="إغلاق" class="p-1 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div id="notifTabs" class="hidden gap-2 px-4 pt-3 overflow-x-auto scrollbar-none">
+                <button type="button" id="notifTab-inbox" onclick="setNotifTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">الإشعارات</button>
+                <button type="button" id="notifTab-reports" onclick="setNotifTab('reports')" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">البلاغات <span id="notifReportsCount" class="mr-1 px-1.5 rounded-full bg-red-500 text-white text-[10px] hidden">0</span></button>
+                <button type="button" id="notifTab-send" onclick="setNotifTab('send')" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">إرسال إشعار</button>
+            </div>
+            <div id="notifBody" class="flex-1 min-h-[200px] overflow-y-auto overscroll-contain p-4 space-y-3"></div>
+            <div id="notifFooter" class="hidden p-3 border-t border-slate-700 text-[11px] text-slate-400"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE NEW FOLDER -->
+    <div id="folderModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="custom-card p-6 rounded-2xl max-w-md w-full space-y-4">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+                <i class="fa-solid fa-folder-plus text-amber-400"></i> إضافة مجلد فرعي مخصص
+            </h3>
+            <div>
+                <label class="block text-xs font-semibold mb-1">اسم المجلد</label>
+                <input type="text" id="folderNameInput" placeholder="مثلاً: الأسئلة الصعبة، الأكثر تكراراً، أسئلة محدّثة..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold mb-1">القسم التابع له</label>
+                <select id="folderCategorySelect" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs">
+                    <option value="quant">القسم الكمي</option>
+                    <option value="verbal">القسم اللفظي</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeFolderModal()" class="px-4 py-2 bg-slate-800 rounded-xl text-xs">إلغاء</button>
+                <button onclick="saveNewFolder()" class="btn-primary px-4 py-2 rounded-xl text-xs font-bold">إنشاء المجلد</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / OCR QUESTION -->
+    <div id="addQuestionModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="custom-card p-6 rounded-2xl max-w-xl w-full space-y-4 my-8">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus text-accent"></i> إضافة سؤال جديد لبنك الأسئلة
+                </h3>
+                <button onclick="closeAddQuestionModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <!-- OCR Scanner Section -->
+            <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-3">
+                <label class="block text-xs font-bold text-amber-400 flex items-center gap-1">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> استخراج النص تلقائياً من صورة السؤال (OCR Engine)
+                </label>
+                <input type="file" id="ocrImageInput" accept="image/*" onchange="processOCRImage(event)" class="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
+                <div id="ocrStatus" class="hidden text-xs text-sky-400 font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-spinner fa-spin"></i> جاري جلب وقراءة صورة السؤال واستخراج الكلام...
+                </div>
+            </div>
+
+            <!-- Question Form -->
+            <form onsubmit="saveQuestion(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold mb-1">القسم والمجلد</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <select id="qCategorySelect" onchange="updateFolderOptionsInModal()" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs">
+                            <option value="quant">القسم الكمي</option>
+                            <option value="verbal">القسم اللفظي</option>
+                        </select>
+                        <select id="qFolderSelect" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs">
+                            <option value="general">عام / بدون مجلد</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1">نص السؤال</label>
+                    <textarea id="qTextInput" required placeholder="اكتب نص السؤال هنا أو استخدم الاستخراج الآلي أعلاه..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs h-20 resize-none"></textarea>
+                </div>
+
+                <!-- Choices -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold">الخيارات (حدد الإجابة الصحيحة)</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800">
+                            <input type="radio" name="correctChoice" value="0" checked class="accent-sky-500">
+                            <input type="text" id="choice0" required placeholder="خيار (أ)" class="w-full bg-transparent text-xs focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800">
+                            <input type="radio" name="correctChoice" value="1" class="accent-sky-500">
+                            <input type="text" id="choice1" required placeholder="خيار (ب)" class="w-full bg-transparent text-xs focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800">
+                            <input type="radio" name="correctChoice" value="2" class="accent-sky-500">
+                            <input type="text" id="choice2" required placeholder="خيار (ج)" class="w-full bg-transparent text-xs focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800">
+                            <input type="radio" name="correctChoice" value="3" class="accent-sky-500">
+                            <input type="text" id="choice3" required placeholder="خيار (د)" class="w-full bg-transparent text-xs focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1">شرح/توضيح طريقة الحل (اختياري)</label>
+                    <input type="text" id="qExplanationInput" placeholder="أدخل الشرح أو القانون المستعمل..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeAddQuestionModal()" class="px-4 py-2 bg-slate-800 rounded-xl text-xs">إلغاء</button>
+                    <button type="submit" class="btn-primary px-5 py-2 rounded-xl text-xs font-bold">حفظ السؤال</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PDF questions review modal -->
+    <div id="pdfImportReviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden items-center justify-center p-3 sm:p-5">
+        <div class="custom-card w-full max-w-4xl max-h-[92vh] rounded-2xl flex flex-col overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-slate-700 flex items-start justify-between gap-3">
+                <div>
+                    <h3 class="font-extrabold text-lg">مراجعة أسئلة الملف</h3>
+                    <p id="pdfImportReviewSummary" class="text-xs text-slate-400 mt-1"></p>
+                    <p class="text-[11px] text-amber-300 mt-2">راجع الإجابات قبل الحفظ؛ قد يخطئ الاستخراج أو حل الذكاء الاصطناعي.</p>
+                    <div id="pdfImportWarnings" class="text-[11px] text-amber-200 mt-2 space-y-1"></div>
+                </div>
+                <button type="button" onclick="closePDFImportReview()" class="text-slate-400 hover:text-white" aria-label="إغلاق">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4 sm:p-5 border-b border-slate-700 flex flex-col sm:flex-row gap-2 sm:items-end">
+                <label class="flex-1 text-xs font-semibold">
+                    اسم الملف داخل بنك الأسئلة
+                    <input id="pdfImportFolderName" type="text" maxlength="60" class="mt-1 w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs">
+                </label>
+                <button type="button" onclick="downloadImportedQuestionsJSON()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">
+                    تنزيل نسخة JSON
+                </button>
+            </div>
+            <div id="pdfExtractedQuestionsList" class="p-4 sm:p-5 space-y-3 overflow-y-auto overscroll-contain"></div>
+            <div class="p-4 border-t border-slate-700 flex flex-wrap justify-end gap-2">
+                <button type="button" onclick="closePDFImportReview()" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold">إلغاء</button>
+                <button type="button" onclick="saveImportedQuestions()" class="btn-primary px-5 py-2 rounded-xl text-xs font-extrabold">
+                    حفظ الأسئلة في البنك
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- منطق الواجهة؛ البيانات الأساسية تُزامن عبر Firebase -->
+    <script src="script.js"></script>
+
+
+
+<script type="module" src="firebase.js"></script>
+
+</body>
+</html>
