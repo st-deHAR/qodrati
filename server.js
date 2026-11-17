@@ -8,7 +8,6 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// يقرأ المفتاح السري تلقائياً من متغيرات البيئة في رندر
 const ai = new GoogleGenAI();
 
 app.get('/', (req, res) => {
@@ -63,7 +62,7 @@ ${text}
         
         res.json(parsedData);
 
-    } `catch` (error) {
+    } catch (error) {
         console.error('Extraction error:', error);
         res.status(500).json({ 
             error: 'حدث خطأ أثناء معالجة الطلب عبر الذكاء الاصطناعي.',
